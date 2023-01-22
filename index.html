@@ -1,0 +1,140 @@
+<html>
+    <head>
+
+    </head>
+    <body>
+        <script src="https://koda.nu/simple.js">
+            let player = {x : 200, y : 200, w: 40, h: 80, color : "red", acc_X: 0, acc_Y: 0, friction: 0.25};
+            let rect = {x : 500, y : 500, w: 40, h: 80, color : "green", acc_X: 0, acc_Y: 0, friction: 0.15};
+            let rect2 = {x : 800, y : 500, w: 40, h: 80, color : "pink", acc_X: 0, acc_Y: 0, friction: 0.15};
+            let fireball = {x : 0, y : 0, w: 10, h: 10, color : "orange", acc_X: 0, acc_Y: 0, friction: 0};
+            let objectList = [player, rect, rect2];
+            let accelerationConst = 2.2;
+            let xLocation = 0;
+            let yLocation = 0;
+            let xDistance = 0;
+            let yDistance = 0;
+            let appear = false;
+            let fire1 = false;
+
+            function playerControl(player){
+                if (keyboard.d) 
+                    player.acc_X += accelerationConst;
+                if (keyboard.a)
+                    player.acc_X -= accelerationConst;
+                if (keyboard.w)
+                    player.acc_Y -= accelerationConst;
+                if (keyboard.s)
+                    player.acc_Y += accelerationConst;
+            }
+
+            function Fireball(){
+                if (keyboard.f){
+                    fireball.x = player.x+45;
+                    fireball.y = player.y+40;
+                    fire1 = true;
+                }
+                if (fire1 == true){
+                    rectangle(fireball.x, fireball.y, fireball.w, fireball.h, fireball.color)
+                    fireball.acc_X = 5;
+                }
+            }
+
+            function firecolis(obj2){
+                
+                if (fireball.x < obj2.x + obj2.w &&
+                    fireball.x + fireball.w > obj2.x &&
+                    fireball.y < obj2.y + obj2.h &&
+                    fireball.h + fireball.y > obj2.y){
+                        fire1 = false;
+                    }
+            }
+
+            function movement(object){
+                object.x += object.acc_X;
+                object.y += object.acc_Y;
+
+                object.acc_X *= 1-object.friction;
+                object.acc_Y *= 1-object.friction;
+                
+                if (object.acc_X > 0 && object.acc_X < 0.2)
+                    object.acc_X = 0;
+                if (object.acc_X < 0 && object.acc_X > -0.2)
+                    object.acc_X = 0;
+                if (object.acc_Y > 0 && object.acc_Y < 0.2)
+                    object.acc_Y = 0;
+                if (object.acc_Y < 0 && object.acc_Y > -0.2)
+                    object.acc_Y = 0;
+            }
+
+            function collission(obj1, obj2){
+                multip = 0.5;
+                x1 = multip * obj1.acc_X;
+                x2 = multip * obj2.acc_X; 
+                y1 = multip * obj1.acc_Y;
+                y2 = multip * obj2.acc_Y;
+                if (obj1.x < obj2.x + obj2.w &&
+                    obj1.x + obj1.w > obj2.x &&
+                    obj1.y < obj2.y + obj2.h &&
+                    obj1.h + obj1.y > obj2.y) {
+                    obj1.acc_X -= x1 + x2;
+                    obj2.acc_X += x1 + x2;
+                    obj1.acc_Y -= y1 + y2;
+                    obj2.acc_Y += y1 + y2;
+                 } 
+            }
+
+            function draw(){
+                if (appear == false) {
+                    rectangle(player.x, player.y, player.w, player.h, player.color);
+                    rectangle(rect.x, rect.y, rect.w, rect.h, rect.color);
+                    rectangle(rect2.x, rect2.y, rect2.w, rect2.h, rect2.color);
+                }
+                else {
+                    rectangle(rect.x, rect.y, rect.w, rect.h, rect.color);
+                    rectangle(rect2.x, rect2.y, rect2.w, rect2.h, rect2.color);
+                }
+            }
+
+            function locatePlayer() {
+                xLocation = player.x + 50;
+                yLocation = player.y + 50;
+            }
+
+            function moveToPlayer(object) {
+                xDistance = xLocation - object.x;
+                yDistance = yLocation - object.y;
+
+                object.acc_X += xDistance/(Math.sqrt(xDistance**2 + yDistance**2))
+                object.acc_Y += yDistance/(Math.sqrt(xDistance**2 + yDistance**2))
+            }
+
+            function update(){
+                fill("black");
+                draw()
+
+                text(800, 100, 16, player.acc_X, "red")
+                text(800, 120, 16, player.acc_Y, "red")
+                text(100, 50, 12, xDistance + " " + yDistance, "green")
+                
+                for (var i = 0; i < objectList.length; i++){
+                    for (var j = i + 1; j < objectList.length; j++){
+                        collission(objectList[i], objectList[j])
+                    }
+                }
+                
+                for (var i = 0; i < objectList.length; i++){
+                    movement(objectList[i])
+                }
+
+                firecolis(rect)
+                Fireball()
+                movement(fireball)
+                playerControl(player)
+                /*locatePlayer()
+                moveToPlayer(rect)
+                moveToPlayer(rect2)*/
+            } 
+        </script>
+    </body>
+</html>
