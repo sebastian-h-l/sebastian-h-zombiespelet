@@ -129,6 +129,7 @@ function border(object) {
   };
 }
 
+//Funktion som skapar fireballs när man klickar på musknappen. 
 function fireball() {
   if (mouse.left === true && fireballCooldown === 0) {
     player.center = { x: player.x + player.w / 2, y: player.y + player.h / 2 };
@@ -148,22 +149,9 @@ function fireball() {
       rectangle(fireballs[i].x, fireballs[i].y, fireballs[i].w, fireballs[i].h, fireballs[i].color);
     }
   }
-
-  /*{
-    if (fireballFire == true) {
-      obj2.health -= 25;
-      fireballFire = false;
-      fireball.acc_X = 0;
-      fireball.acc_Y = 0;
-    }
-    if (obj2.health <= 0) {
-      obj2.health = 0;
-      obj2.visability = false;
-      fireball.acc_X = fireballMovement.x;
-      fireball.acc_Y = fireballMovement.y;
-    }
-  }*/
 }
+
+//Kollar om en fireball träffat ett objekt. Om detta sker tas blir objektets liv mindre och fireballen försvinner
 function fireballCollisionChecker(object) {
   if (fireballs.length > 0) {
     for (var i = 0; i < fireballs.length; i++) {
@@ -174,6 +162,7 @@ function fireballCollisionChecker(object) {
         fireballs[i].h + fireballs[i].y > object.y
       ) {
         object.health -= 25;
+        // splice används för att ta bort ett objekt från list. i är positionen i listan och 1 står för hur många objekt som ska tas bort
         fireballs.splice(i, 1);
       }
     }
