@@ -78,8 +78,8 @@ function objectDraw(object) {
 
 //Funktion så att object kan följa efter spelaren
 function followPlayer(object) {
-    //Ger avståndet till objekt
-    this.enemyDistance = sqrt(
+  //Ger avståndet till objekt
+  this.enemyDistance = sqrt(
     (player.x - object.x) ** 2 + (player.y - object.y) ** 2
   );
   //Ändrar accelerationen på en axel beroende på var objektet är utifrån var player objektet är. Delar på distansen för att objektet ska röra sig jämnt mot player och inte hacka fram och tillbaka som skedde med koden från youtube-videon.
@@ -93,20 +93,42 @@ function followPlayer(object) {
     2.7;
 }
 
+//Kod som kollar ifall två objekt kolliderar. Om det sker så dras även lite utav objekt 1:s liv och en cooldown för att objekt 2 ska kunna attakera startar
+function collission(obj1, obj2) {
+  multip = 1.2;
+  if (
+    obj1.x < obj2.x + obj2.w &&
+    obj1.x + obj1.w > obj2.x &&
+    obj1.y < obj2.y + obj2.h &&
+    obj1.h + obj1.y > obj2.y &&
+    obj2.damageCooldown === 0) {
+      obj1.health -= 10;
+      obj2.damageCooldown = 120;
+  }
+  //Om objekt 2 har en cooldown så börjar den minska
+  if (obj2.damageCooldown > 0)
+    obj2.damageCooldown--;
+}
+
+//Skapar en gräns så att spelaren inte kan gå utanför mappen
 function border(object) {
-    if(object.x <= 0){
-        object.x -= object.acc_X * (1/(1 - object.friction));
-    };
-    if(object.y <= 0){
-        object.y -= object.acc_Y * (1/(1 - object.friction));
-    };
-    if(object.x + object.w >= screen.width){
-        object.x -= object.acc_X * (1/(1 - object.friction));
-    };
-    //Har ingen aning varför det ska vara multiplicerat med två men det fungerar inte annarss
-    if(object.y + 2*object.h>= screen.height){
-        object.y -= object.acc_Y * (1/(1 - object.friction));
-    };
+  if (object.x <= 0) {
+    object.x -= object.acc_X * (1 / (1 - object.friction));
+  };
+  if (object.y <= 0) {
+    object.y -= object.acc_Y * (1 / (1 - object.friction));
+  };
+  if (object.x + object.w >= screen.width) {
+    object.x -= object.acc_X * (1 / (1 - object.friction));
+  };
+  //Har ingen aning varför det ska vara multiplicerat med två men det fungerar inte annarss
+  if (object.y + object.h >= screen.height) {
+    object.y -= object.acc_Y * (1 / (1 - object.friction));
+  };
+}
+
+function fireball() {
+  
 }
 
 function update() {
@@ -119,9 +141,11 @@ function update() {
   for (var i = 0; i < zombies.length; i++) {
     //followPlayer(zombies[i]);
     movement(zombies[i]);
+    collission(player, zombies[i]);
     objectDraw(zombies[i]);
   }
 
+  //Debug
   text(900, 100, 16, player.acc_X, "red");
   text(900, 120, 16, player.acc_Y, "red");
   text(200, 100, 16, player.y, "green");
