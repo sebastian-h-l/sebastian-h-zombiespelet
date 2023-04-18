@@ -1,5 +1,6 @@
 let objectList = [];
 let zombies = [];
+let fireballs = [];
 let player = {
   x: 200,
   y: 200,
@@ -14,6 +15,7 @@ let player = {
   visability: true,
   center: 0,
 };
+let fireballCooldown = 0;
 
 var i = 0;
 //while loop som lägger till zombies i en lista. Några av värdena på zombiesen är även varierade för en mer varierat gameplay
@@ -102,8 +104,8 @@ function collission(obj1, obj2) {
     obj1.y < obj2.y + obj2.h &&
     obj1.h + obj1.y > obj2.y &&
     obj2.damageCooldown === 0) {
-      obj1.health -= 10;
-      obj2.damageCooldown = 120;
+    obj1.health -= 10;
+    obj2.damageCooldown = 120;
   }
   //Om objekt 2 har en cooldown så börjar den minska
   if (obj2.damageCooldown > 0)
@@ -128,7 +130,54 @@ function border(object) {
 }
 
 function fireball() {
-  
+  if (mouse.left === true && fireballCooldown === 0) {
+    player.center = { x: player.x + player.w / 2, y: player.y + player.h / 2 };
+    playerAimX = mouse.x - player.center.x;
+    playerAimY = mouse.y - player.center.y;
+    aimDistance = sqrt(playerAimX ** 2 + playerAimY ** 2);
+    fireballs.push({ x: player.center.x - 2.5, y: player.center.y - 2.5, w: 5, h: 5, friction: 0, color: "orange", acc_X: (4 * playerAimX) / aimDistance, acc_Y: (4 * playerAimY) / aimDistance });
+    fireballCooldown = 90;
+  }
+
+  if (fireballCooldown > 0){
+    fireballCooldown--;
+  }
+  if (fireballs.length > 0) {
+    for (var i = 0; i < fireballs.length; i++) {
+      movement(fireballs[i]);
+      rectangle(fireballs[i].x, fireballs[i].y, fireballs[i].w, fireballs[i].h, fireballs[i].color);
+    }
+  }
+
+  /*{
+    if (fireballFire == true) {
+      obj2.health -= 25;
+      fireballFire = false;
+      fireball.acc_X = 0;
+      fireball.acc_Y = 0;
+    }
+    if (obj2.health <= 0) {
+      obj2.health = 0;
+      obj2.visability = false;
+      fireball.acc_X = fireballMovement.x;
+      fireball.acc_Y = fireballMovement.y;
+    }
+  }*/
+}
+function fireballCollisionChecker(object) {
+  if (fireballs.length > 0) {
+    for (var i = 0; i < fireballs.length; i++) {
+      if (
+        fireballs[i].x < object.x + object.w &&
+        fireballs[i].x + fireballs[i].w > object.x &&
+        fireballs[i].y < object.y + object.h &&
+        fireballs[i].h + fireballs[i].y > object.y
+      ) {
+        object.health -= 25;
+        fireballs.splice(i, 1);
+      }
+    }
+  }
 }
 
 function update() {
@@ -137,13 +186,16 @@ function update() {
   playerControl(player);
   movement(player);
   objectDraw(player);
+  fireball();
   //Loop för att göra så att funktionerna som läggs till finns på alla zombies
   for (var i = 0; i < zombies.length; i++) {
     //followPlayer(zombies[i]);
     movement(zombies[i]);
     collission(player, zombies[i]);
     objectDraw(zombies[i]);
+    fireballCollisionChecker(zombies[i])
   }
+
 
   //Debug
   text(900, 100, 16, player.acc_X, "red");
