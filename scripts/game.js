@@ -78,33 +78,52 @@ function objectDraw(object) {
 
 //Funktion så att object kan följa efter spelaren
 function followPlayer(object) {
-    //Ger kordinaterna för spelarens mittpunkt
-  //player.center = { x: player.x + player.w / 2, y: player.y + player.h / 2 };
-  let enemyDistance = sqrt(
-    (player./*center.*/x - object.x) ** 2 + (player./*center.*/y - object.y) ** 2
+    //Ger avståndet till objekt
+    this.enemyDistance = sqrt(
+    (player.x - object.x) ** 2 + (player.y - object.y) ** 2
   );
+  //Ändrar accelerationen på en axel beroende på var objektet är utifrån var player objektet är. Delar på distansen för att objektet ska röra sig jämnt mot player och inte hacka fram och tillbaka som skedde med koden från youtube-videon.
   object.acc_X =
-    ((player./*center.*/x - object.x) / enemyDistance) *
+    ((player.x - object.x) / this.enemyDistance) *
     object.accelerationConst *
     2.7;
   object.acc_Y =
-    ((player./*center.*/y - object.y) / enemyDistance) *
+    ((player.y - object.y) / this.enemyDistance) *
     object.accelerationConst *
     2.7;
 }
 
+function border(object) {
+    if(object.x <= 0){
+        object.x -= object.acc_X * (1/(1 - object.friction));
+    };
+    if(object.y <= 0){
+        object.y -= object.acc_Y * (1/(1 - object.friction));
+    };
+    if(object.x + object.w >= screen.width){
+        object.x -= object.acc_X * (1/(1 - object.friction));
+    };
+    //Har ingen aning varför det ska vara multiplicerat med två men det fungerar inte annarss
+    if(object.y + 2*object.h>= screen.height){
+        object.y -= object.acc_Y * (1/(1 - object.friction));
+    };
+}
+
 function update() {
   fill("white");
+  border(player);
   playerControl(player);
   movement(player);
   objectDraw(player);
   //Loop för att göra så att funktionerna som läggs till finns på alla zombies
   for (var i = 0; i < zombies.length; i++) {
-    followPlayer(zombies[i]);
+    //followPlayer(zombies[i]);
     movement(zombies[i]);
     objectDraw(zombies[i]);
   }
 
   text(900, 100, 16, player.acc_X, "red");
   text(900, 120, 16, player.acc_Y, "red");
+  text(200, 100, 16, player.y, "green");
+  text(200, 120, 16, (player.y + player.h), "orange")
 }
