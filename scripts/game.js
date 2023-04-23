@@ -2,6 +2,7 @@ let objectList = [];
 let zombies = [];
 let fireballs = [];
 let wave = 0;
+let pause = false;
 let player = {
   x: 200,
   y: 200,
@@ -18,13 +19,16 @@ let player = {
   center: 0,
 };
 let fireballCooldown = 0;
+let aoeAttackCooldown = 0;
+let damageMuliplier = 1;
+let cooldownMultiplier = 1;
 
 //Funktion som tar input och ändrar spelarens accelation genom att plussa på en konstant för acceleration
 function playerControl(player) {
-  if (keyboard.d) player.acc_X += player.accelerationConst;
-  if (keyboard.a) player.acc_X -= player.accelerationConst;
-  if (keyboard.w) player.acc_Y -= player.accelerationConst;
-  if (keyboard.s) player.acc_Y += player.accelerationConst;
+  if (keyboard.d || keyboard.right) player.acc_X += player.accelerationConst;
+  if (keyboard.a || keyboard.left) player.acc_X -= player.accelerationConst;
+  if (keyboard.w || keyboard.up) player.acc_Y -= player.accelerationConst;
+  if (keyboard.s || keyboard.down) player.acc_Y += player.accelerationConst;
 }
 
 //Funktion så att objekt kan röra sig
@@ -48,8 +52,8 @@ function enemyCreate(zombie, buffZombies, zombieBoss) {
   //for loop som lägger till zombies i en lista. Några av värdena på zombiesen är även varierade för en mer varierat gameplay
   for (var i = 0; i < zombie; i++) {
     zombies.push({
-      x: Math.random() * screen.width-40,
-      y: Math.random() * screen.height-80,
+      x: Math.random() * screen.width - 40,
+      y: Math.random() * screen.height - 80,
       w: 40,
       h: 80,
       friction: Math.floor(Math.random() * 4 + 1) / 10,
@@ -163,7 +167,6 @@ function border(object) {
   if (object.x + object.w >= screen.width) {
     object.x -= object.acc_X * (1 / (1 - object.friction));
   }
-  //Har ingen aning varför det ska vara multiplicerat med två men det fungerar inte annarss
   if (object.y + object.h >= screen.height) {
     object.y -= object.acc_Y * (1 / (1 - object.friction));
   }
@@ -192,6 +195,7 @@ function fireball() {
   if (fireballCooldown > 0) {
     fireballCooldown--;
   }
+
   if (fireballs.length > 0) {
     for (var i = 0; i < fireballs.length; i++) {
       movement(fireballs[i]);
@@ -204,6 +208,29 @@ function fireball() {
       );
     }
   }
+}
+
+aoeSpawnPoints = [{ x: 5, y: 0 }, { x: -5, y: 0 }, { x: 0, y: 5 }, { x: 0, y: -5 }, { x: 2.24, y: 2.24 }, { x: -2.24, y: -2.24 }, { x: -2.24, y: 2.24 }, { x: 2.24, y: -2.24 }];
+
+function aoeAttack(object) {
+  player.center = { x: player.x + player.w / 2, y: player.y + player.h / 2 };
+  if (keyboard.space && aoeAttackCooldown === 0) {
+    for (var i = 0; i < aoeSpawnPoints.length; i++) {
+      fireballs.push({
+        x: player.center.x - 3.5,
+        y: player.center.y - 3.5,
+        w: 10,
+        h: 10,
+        friction: 0,
+        color: "orange",
+        acc_X: aoeSpawnPoints[i].x,
+        acc_Y: aoeSpawnPoints[i].y,
+      });
+    }
+    aoeAttackCooldown = 90;
+  }
+  if(aoeAttackCooldown > 0)
+    aoeAttackCooldown--;
 }
 
 //Kollar om en fireball träffat ett objekt. Om detta sker tas blir objektets liv mindre och fireballen försvinner
@@ -229,41 +256,54 @@ function fireballCollisionChecker(object, iValue) {
 
 }
 
-function waveChanger(){
-  if (wave === 0){
+function waveChanger() {
+  if (wave === 0) {
     enemyCreate(15, 0, 0)
     wave++;
   }
-  if(zombies.length === 0 && wave === 1){
+  if (zombies.length === 0 && wave === 1) {
     wave++;
     enemyCreate(10, 5, 0);
   }
-  if(zombies.length === 0 && wave === 2){
+  if (zombies.length === 0 && wave === 2) {
     wave++;
     enemyCreate(15, 5, 1);
   }
 }
 
 function update() {
-  waveChanger();
-  fill("white");
-  border(player);
-  playerControl(player);
-  movement(player);
-  objectDraw(player);
-  fireball();
-  //Loop för att göra så att funktionerna som läggs till finns på alla zombies
-  for (var i = 0; i < zombies.length; i++) {
-    followPlayer(zombies[i]);
-    movement(zombies[i]);
-    collission(player, zombies[i]);
-    objectDraw(zombies[i]);
-    fireballCollisionChecker(zombies[i], i);
-  }
+  if (keyboard.p && pause === false)
+    pause = true;
 
-  //Debug
-  text(900, 100, 16, player.acc_X, "red");
-  text(900, 120, 16, player.acc_Y, "red");
-  text(200, 100, 16, player.y, "green");
-  text(200, 120, 16, player.y + player.h, "orange");
+  if (pause === false) {
+    waveChanger();
+    fill("white");
+    playerControl(player);
+    movement(player);
+    border(player);
+    objectDraw(player);
+    fireball();
+    aoeAttack();
+    //Loop för att göra så att funktionerna som läggs till finns på alla zombies
+    for (var i = 0; i < zombies.length; i++) {
+      followPlayer(zombies[i]);
+      movement(zombies[i]);
+      collission(player, zombies[i]);
+      objectDraw(zombies[i]);
+      fireballCollisionChecker(zombies[i], i);
+    }
+
+    //Debug
+    text(900, 100, 16, player.acc_X, "red");
+    text(900, 120, 16, player.acc_Y, "red");
+    text(200, 100, 16, player.y, "green");
+    text(200, 120, 16, player.y + player.h, "orange");
+  }
+  else {
+    fill("white")
+    text((screen.width / 2) - 110, (screen.height / 2) - 20, 24, "Paused", "orange");
+    text((screen.width / 2) - 110, (screen.height / 2), 24, "unpause with 'u'", "orange");
+    if (keyboard.u)
+      pause = false;
+  }
 }
