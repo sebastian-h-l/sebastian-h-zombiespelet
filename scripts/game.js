@@ -282,7 +282,7 @@ function fireballCollisionChecker(object, iValue) {
 //Ändrar wave när alla zombies dödats under föregående. Skapar även nya zombies. Upgrade menyn öppnas även efter varje wave då upgradeMenu sätts till true
 function waveChanger() {
   if (wave === 0) {
-    enemyCreate(5, 0, 0);
+    enemyCreate(10, 0, 0);
     wave++;
   }
   if (zombies.length === 0 && wave === 1) {
@@ -294,7 +294,7 @@ function waveChanger() {
   if (zombies.length === 0 && wave === 2) {
     upgradeMenu = true;
     wave++;
-    enemyCreate(2, 6, 1);
+    enemyCreate(0, 5, 1);
     player.health = player.maxHealth;
   }
 }
@@ -305,7 +305,7 @@ function update() {
   //Kollar ifall spelaren har tappat allt sitt liv
   if (wave === 3 && zombies.length === 0) {
     fill("green");
-    text((screen.width/2) - 120, (screen.height/2) - 40, 40, "Win", "red");
+    text((screen.width/2) - 120, (screen.height/2) - 40, 40, "You Win", "red");
     //timeout som väntar 2000 millisekunder och sedan skickas man till index.html
     setTimeout(() => {
       window.open("./index.html", "_self");
