@@ -305,7 +305,7 @@ function update() {
   //Kollar ifall spelaren har tappat allt sitt liv
   if (wave === 3 && zombies.length === 0) {
     fill("green");
-    text((screen.width/2) - 120, (screen.height/2) - 40, 40, "You Win", "red");
+    text((screen.width / 2) - 120, (screen.height / 2) - 40, 40, "You Win", "red");
     //timeout som väntar 2000 millisekunder och sedan skickas man till index.html
     setTimeout(() => {
       window.open("./index.html", "_self");
@@ -318,7 +318,7 @@ function update() {
   }
   else if (player.health <= 0) {
     fill("green");
-    text((screen.width/2) - 120, (screen.height/2) - 40, 40, "Game Over", "red");
+    text((screen.width / 2) - 120, (screen.height / 2) - 40, 40, "Game Over", "red");
     //timeout som väntar 2000 millisekunder och sedan skickas man till index.html
     setTimeout(() => {
       window.open("./index.html", "_self");
